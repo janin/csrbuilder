@@ -100,6 +100,7 @@ class CSRBuilder(object):
 
         self._hash_algo = 'sha256'
         self._other_extensions = {}
+        self._custom_attributes = []
 
     @_writer
     def subject(self, value):
@@ -361,6 +362,12 @@ class CSRBuilder(object):
         else:
             self._extended_key_usage = x509.ExtKeyUsageSyntax(list(value))
 
+    def add_attribute(self, name, values):
+        self._custom_attributes.append({
+            'type': name,
+            'values': values
+        })
+
     def set_extension(self, name, value):
         """
         Sets the value for an extension using a fully constructed Asn1Value
@@ -486,7 +493,7 @@ class CSRBuilder(object):
         for name in sorted(self._other_extensions.keys()):
             extensions.append(_make_extension(name, self._other_extensions[name]))
 
-        attributes = []
+        attributes = self._custom_attributes
         if extensions:
             attributes.append({
                 'type': 'extension_request',
